@@ -1,9 +1,9 @@
 use colog;
 use log::info;
-use num_bigint::{BigInt, BigUint, RandBigInt, ToBigInt};
+use num_bigint::{BigInt, BigUint, ToBigInt};
+use num_primes::Generator;
 use num_traits::cast::ToPrimitive;
 use num_traits::{One, Zero};
-use rand::thread_rng;
 use std::io;
 
 pub struct RSA {
@@ -13,22 +13,35 @@ pub struct RSA {
 }
 
 impl RSA {
-    pub fn new(_key_size: usize) -> Self {
-        let mut _rng = thread_rng();
+    pub fn new(key_size: usize) -> Self {
+        // Generate two random primes of key_size/2 bits each
+        let p = Generator::new_prime(key_size / 2);
+        let q = Generator::new_prime(key_size / 2);
 
-        let p = _rng.gen_biguint(1024);
-        let q = _rng.gen_biguint(1024);
-        let n = &p * &q;
+        // Convert num-primes::BigUint to num-bigint::BigUint
+        let p_bigint = num_bigint::BigUint::parse_bytes(p.to_string().as_bytes(), 10).unwrap();
+        let q_bigint = num_bigint::BigUint::parse_bytes(q.to_string().as_bytes(), 10).unwrap();
 
-        let phi = (&p - BigUint::one()) * (&q - BigUint::one());
-        let e = _rng.gen_biguint(1024);
-        let d = mod_inverse(&e, &phi).unwrap();
+        let n = &p_bigint * &q_bigint;
+
+        let phi =
+            (&p_bigint - num_bigint::BigUint::one()) * (&q_bigint - num_bigint::BigUint::one());
+
+        let e = num_bigint::BigUint::from(65537u32);
+
+        // Calculate private key
+        let d = mod_inverse(&e, &phi)
+            .expect("Failed to compute modular inverse - e and phi must be coprime");
+
+        info!("Generated RSA key pair of {} bits", key_size);
+        info!("Public key (n,e): ({}, {})", n, e);
 
         RSA { n, e, d }
     }
 
     pub fn encrypt(&self, message: &str) -> Vec<BigUint> {
         message
+            .trim() // Remove newline
             .bytes()
             .map(|b| {
                 let m = BigUint::from(b as u32);
@@ -45,7 +58,7 @@ impl RSA {
             .iter()
             .map(|c| {
                 let m = c.modpow(&self.d, &self.n);
-                m.to_u8().unwrap()
+                m.to_u8().expect("Decrypted value too large for u8")
             })
             .collect();
 
@@ -84,7 +97,6 @@ fn main() {
     info!("RSA Encryption/Decryption");
     info!("Enter a message to encrypt:");
 
-    let rsa = RSA::new(1024); // Small key size for testing
     let mut message: String = "".to_string();
     match io::stdin().read_line(&mut message) {
         Ok(n) => match n {
@@ -93,6 +105,8 @@ fn main() {
         },
         Err(error) => println!("error: {error}"),
     }
+
+    let rsa = RSA::new(1024);
 
     info!("Original: {}", message);
 
