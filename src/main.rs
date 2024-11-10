@@ -109,7 +109,7 @@ fn main() {
 
     let rsa = RSA::new(1024);
 
-    info!("Original: {}", message);
+    info!("Original: {}", message.trim());
 
     let encrypted = rsa.encrypt(&message);
     info!("Encrypted: {:?}", encrypted);
