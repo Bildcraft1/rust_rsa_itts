@@ -35,6 +35,7 @@ impl RSA {
 
         info!("Generated RSA key pair of {} bits", key_size);
         info!("Public key (n,e): ({}, {})", n, e);
+        info!("Private key (n,d): ({}, {})", n, d);
 
         RSA { n, e, d }
     }
