@@ -1,9 +1,9 @@
 use colog;
 use log::info;
-use num_bigint::{BigInt, BigUint, ToBigInt};
+use num_bigint::BigUint;
 use num_primes::Generator;
 use num_traits::cast::ToPrimitive;
-use num_traits::{One, Zero};
+use num_traits::One;
 use std::io;
 
 pub struct RSA {
@@ -30,7 +30,7 @@ impl RSA {
         let e = num_bigint::BigUint::from(65537u32);
 
         // Calculate private key
-        let d = mod_inverse(&e, &phi)
+        let d = BigUint::modinv(&e, &phi)
             .expect("Failed to compute modular inverse - e and phi must be coprime");
 
         info!("Generated RSA key pair of {} bits", key_size);
@@ -65,32 +65,6 @@ impl RSA {
 
         String::from_utf8(decrypted).expect("Failed to decode UTF-8")
     }
-}
-
-fn mod_inverse(a: &BigUint, m: &BigUint) -> Option<BigUint> {
-    let mut t = BigInt::zero();
-    let mut newt = BigInt::one();
-    let mut r = m.to_bigint().unwrap();
-    let mut newr = a.to_bigint().unwrap();
-
-    while !newr.is_zero() {
-        let quotient = &r / &newr;
-        let (temp_t, temp_r) = (t.clone(), r.clone());
-        t = newt.clone();
-        r = newr.clone();
-        newt = temp_t - &quotient * &newt;
-        newr = temp_r - &quotient * &newr;
-    }
-
-    if r > BigInt::one() {
-        return None;
-    }
-
-    while t < BigInt::zero() {
-        t = t + &m.to_bigint().unwrap();
-    }
-
-    Some(t.to_biguint().unwrap())
 }
 
 fn main() {
