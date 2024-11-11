@@ -15,8 +15,8 @@ pub struct RSA {
 impl RSA {
     pub fn new(key_size: usize) -> Self {
         // Generate two random primes of key_size/2 bits each
-        let p = Generator::new_prime(key_size / 2);
-        let q = Generator::new_prime(key_size / 2);
+        let p = Generator::new_prime(key_size);
+        let q = Generator::new_prime(key_size);
 
         // Convert num-primes::BigUint to num-bigint::BigUint
         let p_bigint = num_bigint::BigUint::parse_bytes(p.to_string().as_bytes(), 10).unwrap();
