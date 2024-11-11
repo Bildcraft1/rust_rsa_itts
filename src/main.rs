@@ -107,7 +107,18 @@ fn main() {
         Err(error) => println!("error: {error}"),
     }
 
-    let rsa = RSA::new(1024);
+    let mut rsa_size: String = "".to_string();
+
+    info!("Enter the size of the RSA key pair (in bits):");
+    match io::stdin().read_line(&mut rsa_size) {
+        Ok(n) => match n {
+            0 => info!("No input provided"),
+            _ => info!("{} bytes read", n),
+        },
+        Err(error) => println!("error: {error}"),
+    }
+
+    let rsa = RSA::new(rsa_size.trim().parse().unwrap());
 
     info!("Original: {}", message.trim());
 
