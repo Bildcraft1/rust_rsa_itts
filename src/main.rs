@@ -1,5 +1,5 @@
 use colog;
-use log::info;
+use log::{info, error};
 use num_bigint::BigUint;
 use num_primes::Generator;
 use num_traits::cast::ToPrimitive;
@@ -71,14 +71,14 @@ fn main() {
     colog::init();
     info!("RSA Encryption/Decryption");
     info!("Enter a message to encrypt:");
-
+    
     let mut message: String = "".to_string();
     match io::stdin().read_line(&mut message) {
         Ok(n) => match n {
             0 => info!("No input provided"),
             _ => info!("{} bytes read", n),
         },
-        Err(error) => println!("error: {error}"),
+        Err(error) => error!("error: {error}"),
     }
 
     let mut rsa_size: String = "".to_string();
@@ -89,7 +89,7 @@ fn main() {
             0 => info!("No input provided"),
             _ => info!("{} bytes read", n),
         },
-        Err(error) => println!("error: {error}"),
+        Err(error) => error!("error: {error}"),
     }
 
     let rsa = RSA::new(rsa_size.trim().parse().unwrap());
