@@ -14,7 +14,7 @@ pub struct RSA {
 
 impl RSA {
     pub fn new(key_size: usize) -> Self {
-        // Generate two random primes of key_size/2 bits each
+        // Generate two random primes of key_size
         let p = Generator::new_prime(key_size);
         let q = Generator::new_prime(key_size);
 
